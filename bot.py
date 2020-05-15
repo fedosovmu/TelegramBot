@@ -37,26 +37,30 @@ class Bot:
         self.db_handler.insert_user(username, first_name, last_name, language_code, is_bot, user_id)
 
         command = self.recognize_command(text)
+        if command == 'start':
+            self.process_start_command(user_id, first_name)
+        if command == 'help':
+            self.process_help_command(user_id)
         if command == 'hello':
             self.telegram_handler.send_message(user_id, 'Hello ' + first_name + '!')
         if command == 'search':
-            self.user_search_command(user_id)
+            self.process_search_command(user_id)
         if command == 'stop':
-            self.user_stop_command(user_id)
+            self.process_stop_command(user_id)
         if command == 'none':
-            self.user_none_command(user_id, text)
+            self.process_none_command(user_id, text)
 
         self.db_handler.update_last_processed_update_id(message['update_id'])
 
-    def user_search_command(self, user_id):
+    def process_search_command(self, user_id):
         in_search = self.db_handler.user_select_in_search(user_id)
         if (in_search):
-            self.telegram_handler.send_message(user_id, 'Поиск уже идет. Для остановки поиска введите комманду \\stop')
+            self.telegram_handler.send_message(user_id, 'Поиск уже идет. Для остановки поиска введите комманду /stop')
         else:
             in_dialogue = self.db_handler.dialogue_select_is_user_in_dialogue(user_id)
             if (in_dialogue):
                 self.telegram_handler.send_message(user_id, 'Невозможно начать поиск нахоядсь в диалоге. '
-                                                            'Для завершения диалога введите комманду \\stop.')
+                                                            'Для завершения диалога введите комманду /stop.')
             else:
                 companion_id = self.db_handler.user_select_user_public_id_in_search()
                 if (companion_id == None):
@@ -70,7 +74,7 @@ class Bot:
 
 
 
-    def user_stop_command(self, user_id):
+    def process_stop_command(self, user_id):
         in_dialogue = self.db_handler.dialogue_select_is_user_in_dialogue(user_id)
         if (in_dialogue):
             companion_id = self.db_handler.dialogue_select_companion_user_public_id(user_id)
@@ -84,9 +88,24 @@ class Bot:
                 self.telegram_handler.send_message(user_id, 'Поиск остановлен.')
             else:
                 self.telegram_handler.send_message(user_id, 'Поиск уже остановлен. '
-                                                            'Для начала нового поиска введите комманду \\search')
+                                                            'Для начала нового поиска введите комманду /search')
 
-    def user_none_command(self, user_id, text):
+    def process_start_command(self, user_id, first_name):
+        send_message_text = 'Привет, {}. Добро пожаловать в наше дизайн-кафе. ' \
+                            'Надеюсь ты хорошо проведешь время общаясь с другими посетителями.'.format(first_name)
+        self.telegram_handler.send_message(user_id, send_message_text)
+        self.process_help_command(user_id)
+
+    def process_help_command(self, user_id):
+        send_message_text = 'Для управления ботом используйте следующие команды:\n' \
+                            '/help - Показать список команд\n' \
+                            '/hello - Поздороваться с ботом\n' \
+                            '/search - Начать поиск собеседника\n' \
+                            '/stop - Закончить разговор, остановить поиск собеседника\n' \
+                            '/contact - Предложить собеседнику обменяться контактами *не реализовано*'
+        self.telegram_handler.send_message(user_id, send_message_text)
+
+    def process_none_command(self, user_id, text):
         in_dialogue = self.db_handler.dialogue_select_is_user_in_dialogue(user_id)
         if (in_dialogue):
             companion_id = self.db_handler.dialogue_select_companion_user_public_id(user_id)
@@ -96,6 +115,10 @@ class Bot:
             self.telegram_handler.send_message(user_id, send_message_text)
 
     def recognize_command(self, text):
+        if text == r'/start':
+            return 'start'
+        if text == r'/help':
+            return 'help'
         if text == r'/hello':
             return 'hello'
         if text == r'/search' or text == r'/find':

@@ -1,0 +1,10 @@
+__pycache__/telegram_handler.cpython-37.pyc
+__pycache__/proxy_server_handler.cpython-37.pyc
+__pycache__/db_handler.cpython-37.pyc
+__pycache__/bot.cpython-37.pyc
+.idea/vcs.xml
+.idea/TelegramBot.iml
+.idea/modules.xml
+.idea/misc.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/inspectionProfiles/profiles_settings.xml
