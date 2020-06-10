@@ -65,12 +65,12 @@ class Bot:
                 companion_id = self.db_handler.user_select_user_public_id_in_search()
                 if (companion_id == None):
                     self.db_handler.user_update_in_search(user_id, True)
-                    self.telegram_handler.send_message(user_id, 'Начинаю поиск.')
+                    self.telegram_handler.send_message(user_id, 'Начинаю поиск. Для остановки поиска введите /stop')
                 else:
                     self.db_handler.user_update_in_search(companion_id, False)
                     self.db_handler.dialogue_insert(user_id, companion_id)
-                    self.telegram_handler.send_message(user_id, 'Собеседник найден.')
-                    self.telegram_handler.send_message(companion_id, 'Собеседник найден.')
+                    self.telegram_handler.send_message(user_id, 'Собеседник найден. Для завершения беседы введите /stop')
+                    self.telegram_handler.send_message(companion_id, 'Собеседник найден. Для завершения беседы введите /stop')
 
 
 
@@ -111,7 +111,7 @@ class Bot:
             companion_id = self.db_handler.dialogue_select_companion_user_public_id(user_id)
             self.telegram_handler.send_message(companion_id, 'Типичный дизайнер: {}'.format(text))
         else:
-            send_message_text = 'Неизвестная комманда "{}"'.format(text)
+            send_message_text = 'Неизвестная комманда "{}". Для просмотра доступных команд введите /help'.format(text)
             self.telegram_handler.send_message(user_id, send_message_text)
 
     def recognize_command(self, text):
@@ -123,6 +123,6 @@ class Bot:
             return 'hello'
         if text == r'/search' or text == r'/find':
             return 'search'
-        if text == r'/stop':
+        if text == r'/stop' or text == r'/exit':
             return 'stop'
         return 'none'
